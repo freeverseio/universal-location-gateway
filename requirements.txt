@@ -1,3 +1,4 @@
 Flask==2.1.2
 Werkzeug==2.0.3
 web3==5.29.1
+requests==2.25.1
