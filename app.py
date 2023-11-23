@@ -1,8 +1,10 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, abort
 import re
 import json
 from web3 import Web3
 import requests
+import time
+import logging
 
 app = Flask(__name__)
 
@@ -63,19 +65,17 @@ def get_chain_info(global_consensus, parachain=""):
     return parachain_config.get('rpc'), parachain_config.get('chainId')  # Return the RPC URL or None if not found
 
 # Function to get the tokenURI from a smart contract
-def get_token_uri(rpc_url, contract_address, asset_id):
+def get_token_uri(rpc_urls, contract_address, asset_id):
     """
-    Call an EVM chain RPC node to get the tokenURI for a given contract address and assetId.
+    Call an EVM chain RPC nodes provided in round-robin fashion to get the tokenURI for a given 
+    contract address and assetId. Retries up to the number of RPC URLs provided with a 1-second 
+    delay between retries if an error occurs.
 
-    :param rpc_url: The RPC URL of the EVM-compatible blockchain node.
+    :param rpc_urls: A list of RPC URLs of the EVM-compatible blockchain nodes.
     :param contract_address: The address of the smart contract.
     :param asset_id: The asset ID for which to retrieve the token URI.
     :return: The token URI if found, otherwise None.
     """
-    # Initialize a web3 connection to the RPC
-    web3 = Web3(Web3.HTTPProvider(rpc_url))
-
-    # Define the contract ABI to include only the function we're interested in (tokenURI)
     contract_abi = [
         {
             "constant": True,
@@ -87,48 +87,94 @@ def get_token_uri(rpc_url, contract_address, asset_id):
             "type": "function",
         },
     ]
+    
+    # Initialize the counter and number of RPC URLs
+    attempts = 0
+    num_rpc_urls = len(rpc_urls)
 
-    # Create a contract object using the contract address and ABI
-    contract = web3.eth.contract(address=contract_address, abi=contract_abi)
+    while attempts < num_rpc_urls:
+        rpc_url = rpc_urls[attempts % num_rpc_urls]  # Round-robin selection
+        web3 = Web3(Web3.HTTPProvider(rpc_url))
+        contract = web3.eth.contract(address=contract_address, abi=contract_abi)
+        
+        try:
+            token_uri = contract.functions.tokenURI(int(asset_id)).call()
+            return token_uri
+        except Exception as e:
+            logging.error(f"Attempt {attempts+1}: Error occurred with RPC URL {rpc_url}: {e}")
+            time.sleep(1)  # Delay for 1 second before the next attempt
+            attempts += 1
+    
+    logging.error("Failed to fetch token URI after trying all RPC URLs.")
+    return None
 
-    try:
-        # Call the tokenURI function of the contract
-        token_uri = contract.functions.tokenURI(int(asset_id)).call()
-        return token_uri
-    except Exception as e:
-        app.logger.error(f"An error occurred when fetching token URI: {e}")
-        return None
+def determine_token_uri_standard(tokenURI):
+    if tokenURI.startswith('ipfs://'):
+        return "ipfs"
+    elif tokenURI.startswith('https://'):
+        return "https"
+    elif tokenURI.startswith('http://'):
+        return "http"
+    else:
+        return "unknown"
 
 def fetch_ipfs_data(token_uri):
-    #TODO Modify function in order to filder for ipfs:// when the tokenURI returns it
-    # Check if the token URI already includes the IPFS gateway URL
-    if not token_uri.startswith('https://ipfs.io/ipfs/'):
-        token_uri = 'https://ipfs.io/ipfs/' + token_uri
+    config = load_config()  # Load the configuration data
+    ipfs_gateway = config.get('ipfsGateway', 'https://ipfs.io/ipfs/')  # Get the IPFS gateway from the config, default if not set
+
+    # Check if the token URI starts with "ipfs://"
+    if token_uri.startswith('ipfs://'):
+        # Extract the CID and construct the URL with the IPFS gateway
+        cid = token_uri.split('ipfs://')[1]
+        token_uri = f'{ipfs_gateway}{cid}'
+    else:
+        # Assume the token URI is a direct CID and add it to the IPFS gateway URL
+        token_uri = f'{ipfs_gateway}{token_uri}'
 
     try:
         response = requests.get(token_uri)
-        response.raise_for_status()  # Will raise an HTTPError if the HTTP request returned an unsuccessful status code
+        response.raise_for_status()  # Raises HTTPError for unsuccessful status codes
         return response.json()
     except requests.exceptions.HTTPError as http_err:
-        print(f"HTTP error occurred: {http_err}")  # Python 3.6
+        logging.error(f"HTTP error occurred: {http_err}")
         return None
     except Exception as err:
-        print(f"An error occurred: {err}")  # Python 3.6
+        logging.error(f"An error occurred: {err}")
         return None
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    """Return JSON instead of HTML for HTTP errors."""
+    response = e.get_response()
+    response.data = json.dumps({
+        "code": e.code,
+        "name": e.name,
+        "description": e.description,
+    })
+    response.content_type = "application/json"
+    return response
 
 @app.route('/<path:path>', methods=['GET'])
 def handle_request(path):
-    """
-    Handle the incoming request and parse the URL to get the content of the tokenURI of that Universal Location.
-
-    :param path: The full path from the request URL.
-    :return: A JSON response with the parsed components.
-    """
-    global_consensus, parachain, account_key, general_key = get_ul_fields(path)
-    rpcUrl, chainId = get_chain_info(global_consensus, parachain)
-    tokenUri = get_token_uri(rpcUrl, account_key, general_key)
-    tokenURIResult = fetch_ipfs_data(tokenUri)
-    return jsonify(tokenURIResult)
+    try:
+        global_consensus, parachain, account_key, general_key = get_ul_fields(path)
+        rpcUrls, chainId = get_chain_info(global_consensus, parachain)
+        if not rpcUrls:
+            abort(404, description="RPC URLs not found.")
+        tokenUri = get_token_uri(rpcUrls, account_key, general_key)
+        if not tokenUri:
+            abort(404, description="Token URI not found.")
+        tokenUriStandard = determine_token_uri_standard(tokenUri)
+        if tokenUriStandard in ["ipfs", "unknown"]:  # TODO remove unknown when Bh fixes demo
+            tokenURIResult = fetch_ipfs_data(tokenUri)
+            if not tokenURIResult:
+                abort(502, description="Failed to fetch data from IPFS.")
+        else:
+            abort(400, description="Invalid token URI standard.")
+        return jsonify(tokenURIResult)
+    except Exception as e:
+        logging.error(f"An error occurred: {e}")
+        abort(500, description="Internal Server Error")
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)
