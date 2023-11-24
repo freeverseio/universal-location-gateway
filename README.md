@@ -49,7 +49,7 @@ Or directly with python:
 $ python app.py
 ```
 
-The server will start, allowing GET requests to http://localhost:4000/ with the appropriate path to receive asset data.
+When the server initiates, it logs the local server's URL (e.g., http://localhost:4000), where GET requests can be directed.
 
 ## Endpoints
 - `GET /<path>`: Parses the given path as a universal location and returns the asset data.
@@ -59,5 +59,5 @@ The functionality can be tested by using curl or any API client like Postman.
 
 Example request:
 ```bash
-$ curl http://localhost:4000/GlobalConsensus(your_global_consensus)/Parachain(your_parachain)/AccountKey20(your_account_key)/GeneralKey(your_general_key)
+$ curl "http://localhost:4000/GlobalConsensus(your_global_consensus)/Parachain(your_parachain)/AccountKey20(your_account_key)/GeneralKey(your_general_key)"
 ```
