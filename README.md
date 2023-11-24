@@ -8,6 +8,15 @@ This Flask application serves as a gateway to fetch and return blockchain asset 
 - Retrieves blockchain asset data from EVM-compatible chains connecting to the corresponding RPC nodes.
 - Fetches and returns IPFS-hosted metadata.
 
+## Limitations
+
+Currently:
+- it only supports `tokenURI` that returns an ipfs address.
+- it only supports ipfs addresses that return strings that can be parsed as a json object, explicitly, via the `jsonify` method.
+- it only supports locations in Polkadot, i.e. it reverts if the `Parachain` junction is not provided.
+- the parsing of the universal location path does not take order into account, e.g. the `GlobalConsensus` keyword can be placed at the end of the path.
+ 
+
 ## Requirements
 
 To run this project, you'll need:
