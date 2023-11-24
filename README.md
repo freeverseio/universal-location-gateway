@@ -16,21 +16,6 @@ To run this project, you'll need:
 - Pip for installing Python packages
 - Access to an EVM-compatible blockchain node
 
-## Installation
-
-First, clone the repository to your local machine:
-
-```bash
-git clone https://your-repository-url.git
-cd universal-location-gateway
-```
-
-Then, set up a virtual environment and install the dependencies:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-pip install -r requirements.txt
-```
 
 ## Configuration
 The project requires a config.json file to define mappings for global consensus parameters. The structure of the config.json file is as follows:
