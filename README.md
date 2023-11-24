@@ -4,8 +4,8 @@ This Flask application serves as a gateway to fetch and return blockchain asset 
 
 ## Features
 
-- Parses URLs to extract blockchain-related parameters.
-- Retrieves blockchain asset data from EVM-compatible chains using RPC.
+- Parses URLs to extract blockchain-related parameters, following the [Universal Location Specification] (https://github.com/freeverseio/laos/issues/177)
+- Retrieves blockchain asset data from EVM-compatible chains connecting to the corresponding RPC nodes.
 - Fetches and returns IPFS-hosted metadata.
 
 ## Requirements
@@ -18,7 +18,7 @@ To run this project, you'll need:
 
 
 ## Configuration
-The project requires a config.json file to define mappings for global consensus parameters. The structure of the config.json file is as follows:
+The project requires a `config.json`` file to define mappings for global consensus parameters, with the following structure:
 
 ```json
 {
@@ -41,23 +41,23 @@ The project requires a config.json file to define mappings for global consensus 
 To start the application, run:
 
 ```bash
-flask run
+$ flask run
 ```
 
 Or directly with python:
 ```bash
-python app.py
+$ python app.py
 ```
 
-The server will start, and you can send GET requests to http://localhost:4000/ with the appropriate path to receive asset data.
+The server will start, allowing GET requests to http://localhost:4000/ with the appropriate path to receive asset data.
 
 ## Endpoints
-- GET /<path>: Parses the given path as a universal location and returns the asset data.
+- `GET /<path>`: Parses the given path as a universal location and returns the asset data.
 
 ## Testing
-You can test the functionality by using curl or any API client like Postman.
+The functionality can be tested by using curl or any API client like Postman.
 
 Example request:
 ```bash
-curl http://localhost:4000/GlobalConsensus(your_global_consensus)/Parachain(your_parachain)/AccountKey20(your_account_key)/GeneralKey(your_general_key)
+$ curl http://localhost:4000/GlobalConsensus(your_global_consensus)/Parachain(your_parachain)/AccountKey20(your_account_key)/GeneralKey(your_general_key)
 ```
