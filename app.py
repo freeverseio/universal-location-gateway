@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 # Load the configuration data from the JSON file into a dictionary
 def load_config():
-    with open('config.json', 'r') as config_file:
+    with open('supportedConsensus.json', 'r') as config_file:
         return json.load(config_file)
 
 # General function to extract content within parentheses after a specific keyword

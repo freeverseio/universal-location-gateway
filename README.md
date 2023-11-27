@@ -27,7 +27,7 @@ To run this project, you'll need:
 
 
 ## Configuration
-The project requires a `config.json`` file to define mappings for global consensus parameters, with the following structure:
+The project requires a `supportedConsensus.json` file to define mappings for global consensus parameters, with the following structure:
 
 ```json
 {
