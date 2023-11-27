@@ -9,6 +9,29 @@ class TestApp(unittest.TestCase):
         self.client = app.test_client()
         self.client.testing = True
 
+    @patch('app.get_ul_fields')
+    @patch('app.get_chain_info')
+    @patch('app.get_token_uri')
+    @patch('app.fetch_ipfs_data')
+    def test_handle_request_success(self, mock_fetch_ipfs_data, mock_get_token_uri, mock_get_chain_info, mock_get_ul_fields):
+        # Mock the functions to return expected values
+        mock_get_ul_fields.return_value = ('123', '456', '0xABC123', '789')
+        mock_get_chain_info.return_value = (['http://example.com'], 1)
+        mock_get_token_uri.return_value = 'ipfs://tokenUri'
+        mock_fetch_ipfs_data.return_value = {'data': 'some data'}
+
+        response = self.client.get('/GlobalConsensus(123)/Parachain(456)/AccountKey20(0xABC123)/GeneralKey(789)')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json, {'data': 'some data'})
+
+    @patch('app.get_ul_fields')
+    def test_handle_request_invalid_path(self, mock_get_ul_fields):
+        # Mock get_ul_fields to return None values indicating an invalid path
+        mock_get_ul_fields.return_value = (None, None, None, None)
+
+        response = self.client.get('/invalid/path')
+        self.assertEqual(response.status_code, 500)
+
     def test_load_config(self):
         config = load_config()
         self.assertIsNotNone(config)
