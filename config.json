@@ -1,32 +1,18 @@
-{
-  "GlobalConsensusMappings": {
-      "0:0x22c48a576c33970622a2b4686a8aa5e4b58350247d69fb5d8015f12a8c8e1e4c": {
-          "relayChainName": "Freeverse Rococo",
-          "Parachains": {
-              "2900": {
-                  "name": "Caladan",
-                  "rpc": [
-                      "https://caladan.gorengine.com/own",
-                      "https://caladan.gorengine.com/own"
-                  ],
-                  "chainId": 667
-              }
-          }
-      },
-      "3": {
-          "relayChainName": "Kusama",
-          "Parachains": {
-              "3336": {
-                  "name": "KLAOS",
-                  "rpc": "",
-                  "ws": "",
-                  "id": 3336
-              }
-          }
-      },
-      "2": {
-          "relayChainName": "Polkadot"
-      }
+[
+  {
+    "Name": "Caladan",
+    "GlobalConsensus": "0:0x22c48a576c33970622a2b4686a8aa5e4b58350247d69fb5d8015f12a8c8e1e4c",
+    "Parachain": "2900",
+    "PalletInstance": "51",
+    "ChainId": "667",
+    "rpc": "https://caladan.gorengine.com/own"
   },
-  "ipfsGateway": "https://ipfs.io/ipfs/"
-}
+  {
+    "Name": "KLAOS",
+    "GlobalConsensus": "3",
+    "Parachain": "3336",
+    "PalletInstance": "51",
+    "ChainId": "2718",
+    "rpc": "https://rpc.klaos.laosfoundation.io"
+  }
+]

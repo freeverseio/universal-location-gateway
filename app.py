@@ -57,19 +57,22 @@ def get_ul_fields(path):
     # Return the extracted values in the expected order
     return tuple(values[key] for key in expected_order)
 
-# Define a function to get the RPC URL from the config given the global consensus and parachain
-def get_chain_info(global_consensus, parachain=""):
+def get_chain_info(global_consensus, parachain):
     """
-    Get the RPC URL from the configuration based on the global consensus and parachain.
+    Get the RPC URL and chain ID from the configuration based on the global consensus and parachain.
 
     :param global_consensus: The global consensus identifier.
     :param parachain: The parachain identifier.
-    :return: The RPC URL if found, or None if not found.
+    :return: A tuple containing the RPC URL and chain ID if found, or aborts with a 400 error if not found.
     """
     config = load_config()  # Load the configuration
-    consensus_config = config.get('GlobalConsensusMappings', {}).get(global_consensus, {})
-    parachain_config = consensus_config.get('Parachains', {}).get(parachain, {})
-    return parachain_config.get('rpc'), parachain_config.get('chainId')  # Return the RPC URL or None if not found
+    for entry in config:
+        if (entry.get("GlobalConsensus") == global_consensus and
+                entry.get("Parachain") == parachain):
+            return entry.get('rpc'), entry.get('ChainId')
+
+    abort(400, description="Non supported consensus system")
+
 
 # Function to get the tokenURI from a smart contract
 def get_token_uri(rpc_urls, contract_address, asset_id):
@@ -169,6 +172,7 @@ def handle_request(path):
             abort(400, description="Invalid URL format.")
 
         rpcUrls, chainId = get_chain_info(global_consensus, parachain)
+
         if not rpcUrls:
             abort(404, description="RPC URLs not found.")
 
