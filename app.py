@@ -39,7 +39,7 @@ def get_ul_fields(path):
     path_segments = path.split('/')
 
     # Define the expected order of parameters
-    expected_order = ['GlobalConsensus', 'Parachain', 'AccountKey20', 'GeneralKey']
+    expected_order = ['GlobalConsensus', 'Parachain', 'PalletInstance', 'AccountKey20', 'GeneralKey']
 
     # Initialize a dictionary to store extracted values
     values = {key: None for key in expected_order}
@@ -57,7 +57,7 @@ def get_ul_fields(path):
     # Return the extracted values in the expected order
     return tuple(values[key] for key in expected_order)
 
-def get_chain_info(global_consensus, parachain):
+def get_chain_info(global_consensus, parachain, pallet_instance):
     """
     Get the RPC URL and chain ID from the configuration based on the global consensus and parachain.
 
@@ -68,10 +68,12 @@ def get_chain_info(global_consensus, parachain):
     config = load_config()  # Load the configuration
     for entry in config:
         if (entry.get("GlobalConsensus") == global_consensus and
-                entry.get("Parachain") == parachain):
+                entry.get("Parachain") == parachain and
+                entry.get("PalletInstance") == pallet_instance):
             return entry.get('rpc'), entry.get('ChainId')
 
     return None, None
+
 
 
 # Function to get the tokenURI from a smart contract
@@ -167,11 +169,11 @@ def handle_exception(e):
 @app.route('/<path:path>', methods=['GET'])
 def handle_request(path):
     try:
-        global_consensus, parachain, account_key, general_key = get_ul_fields(path)
-        if not all([global_consensus, parachain, account_key, general_key]):
+        global_consensus, parachain, pallet_instance, account_key, general_key = get_ul_fields(path)
+        if not all([global_consensus, parachain, pallet_instance, account_key, general_key]):
             abort(400, description="Invalid URL format.")
 
-        rpcUrls, chainId = get_chain_info(global_consensus, parachain)
+        rpcUrls, chainId = get_chain_info(global_consensus, parachain, pallet_instance)
 
         if not rpcUrls:
             abort(404, description="RPC URLs not found.")

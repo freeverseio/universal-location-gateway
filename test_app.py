@@ -15,7 +15,7 @@ class TestApp(unittest.TestCase):
     @patch('app.fetch_ipfs_data')
     def test_handle_request_success(self, mock_fetch_ipfs_data, mock_get_token_uri, mock_get_chain_info, mock_get_ul_fields):
         # Mock the functions to return expected values
-        mock_get_ul_fields.return_value = ('3', '3336', '0xABC123', '789')
+        mock_get_ul_fields.return_value = ('3', '3336', '51', '0xABC123', '789')
         mock_get_chain_info.return_value = (['http://example.com'], 1)
         mock_get_token_uri.return_value = 'ipfs://tokenUri'
         mock_fetch_ipfs_data.return_value = {'data': 'some data'}
@@ -48,8 +48,8 @@ class TestApp(unittest.TestCase):
         self.assertIsNone(result)
 
     def test_get_ul_fields_correct_order(self):
-        path = 'GlobalConsensus(123)/Parachain(456)/AccountKey20(0xABC123)/GeneralKey(789)'
-        expected = ('123', '456', '0xABC123', '789')
+        path = 'GlobalConsensus(123)/Parachain(456)/PalletInstance(52)/AccountKey20(0xABC123)/GeneralKey(789)'
+        expected = ('123', '456', '52', '0xABC123', '789')
         self.assertEqual(get_ul_fields(path), expected)
 
     def test_get_ul_fields_incorrect_order(self):
@@ -75,11 +75,11 @@ class TestApp(unittest.TestCase):
         loaded_config = load_config()
         mock_load_config.return_value = loaded_config
 
-        rpc_urls, chain_id = get_chain_info('3', '3336')
+        rpc_urls, chain_id = get_chain_info('3', '3336', '51')
         self.assertEqual(rpc_urls, ['https://rpc.klaos.laosfoundation.io'])
         self.assertEqual(chain_id, '2718')
 
-        rpc_url, chain_id = get_chain_info('999', '888')
+        rpc_url, chain_id = get_chain_info('999', '888', '52')
         self.assertIsNone(rpc_url)
         self.assertIsNone(chain_id)
 
