@@ -39,15 +39,17 @@ def get_ul_fields(path):
     parachain = extract_between_parentheses('Parachain', path_segments)
     account_key = extract_between_parentheses('AccountKey20', path_segments)
     general_key = extract_between_parentheses('GeneralKey', path_segments)
+    pallet_instance = extract_between_parentheses('PalletInstance', path_segments)
 
     # Construct the response with the parsed data
     response = {
         "GlobalConsensus": global_consensus,
         "Parachain": parachain,
         "AccountKey20": account_key,
-        "GeneralKey": general_key
+        "GeneralKey": general_key,
+        "PalletInstance": pallet_instance
     }
-    return(global_consensus, parachain, account_key, general_key)
+    return(global_consensus, parachain, account_key, general_key, pallet_instance)
 
 
 # Define a function to get the RPC URL from the config given the global consensus and parachain
@@ -157,7 +159,7 @@ def handle_exception(e):
 @app.route('/<path:path>', methods=['GET'])
 def handle_request(path):
     try:
-        global_consensus, parachain, account_key, general_key = get_ul_fields(path)
+        global_consensus, parachain, account_key, general_key, pallet_instance = get_ul_fields(path) # Use pallet_instance in the future when more pallet locations are introduced
         rpcUrls, chainId = get_chain_info(global_consensus, parachain)
         if not rpcUrls:
             abort(404, description="RPC URLs not found.")

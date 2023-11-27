@@ -5,7 +5,7 @@
         "Parachains": {
           "2900":{
             "name": "Caladan",
-            "rpc": ["https://caladan.gorengine.com/own","https://caladan.gorengine.com/own"],
+            "rpc": ["https://caladan.gorengine.com/own"],
             "chainId": 667
           }
       }
@@ -15,9 +15,8 @@
         "Parachains": {
             "3336":{
               "name": "KLAOS",
-              "rpc": "",
-              "ws": "",
-              "id": 3336
+              "rpc": ["https://rpc.klaos.laosfoundation.io"],
+              "chainId": 2718
             }
         }
     },
