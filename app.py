@@ -180,12 +180,17 @@ def handle_exception(e):
 def handle_request(path):
     try:
         global_consensus, parachain, account_key, general_key = get_ul_fields(path)
+        if not all([global_consensus, parachain, account_key, general_key]):
+            abort(400, description="Invalid URL format.")
+
         rpcUrls, chainId = get_chain_info(global_consensus, parachain)
         if not rpcUrls:
             abort(404, description="RPC URLs not found.")
+
         tokenUri = get_token_uri(rpcUrls, account_key, general_key)
         if not tokenUri:
             abort(404, description="Token URI not found.")
+
         tokenUriStandard = determine_token_uri_standard(tokenUri)
         if tokenUriStandard in ["ipfs", "unknown"]:  # TODO remove unknown when Bh fixes demo
             tokenURIResult = fetch_ipfs_data(tokenUri)
@@ -193,7 +198,9 @@ def handle_request(path):
                 abort(502, description="Failed to fetch data from IPFS.")
         else:
             abort(400, description="Invalid token URI standard.")
+
         return jsonify(tokenURIResult)
+
     except Exception as e:
         logging.error(f"An error occurred: {e}")
         abort(500, description="Internal Server Error")
