@@ -15,7 +15,7 @@ class TestApp(unittest.TestCase):
     @patch('app.fetch_ipfs_data')
     def test_handle_request_success(self, mock_fetch_ipfs_data, mock_get_token_uri, mock_get_chain_info, mock_get_ul_fields):
         # Mock the functions to return expected values
-        mock_get_ul_fields.return_value = ('123', '456', '0xABC123', '789')
+        mock_get_ul_fields.return_value = ('3', '3336', '0xABC123', '789')
         mock_get_chain_info.return_value = (['http://example.com'], 1)
         mock_get_token_uri.return_value = 'ipfs://tokenUri'
         mock_fetch_ipfs_data.return_value = {'data': 'some data'}
@@ -72,32 +72,16 @@ class TestApp(unittest.TestCase):
 
     @patch('app.load_config')
     def test_get_chain_info(self, mock_load_config):
-        mock_load_config.return_value = [
-            {
-                "Name": "Caladan",
-                "GlobalConsensus": "0:0x22c48a576c33970622a2b4686a8aa5e4b58350247d69fb5d8015f12a8c8e1e4c",
-                "Parachain": "2900",
-                "PalletInstance": "51",
-                "ChainId": "667",
-                "rpc": "https://caladan.gorengine.com/own"
-            },
-            {
-                "Name": "KLAOS",
-                "GlobalConsensus": "3",
-                "Parachain": "3336",
-                "PalletInstance": "51",
-                "ChainId": "1",
-                "rpc": "http://example.com"
-            }
-        ]
+        loaded_config = load_config()
+        mock_load_config.return_value = loaded_config
 
-        rpc_url, chain_id = get_chain_info('3', '3336')
-        self.assertEqual(rpc_url, 'http://example.com')
-        self.assertEqual(chain_id, '1')
+        rpc_urls, chain_id = get_chain_info('3', '3336')
+        self.assertEqual(rpc_urls, ['https://rpc.klaos.laosfoundation.io'])
+        self.assertEqual(chain_id, '2718')
 
-        # rpc_url, chain_id = get_chain_info('999', '888')
-        # self.assertIsNone(rpc_url)
-        # self.assertIsNone(chain_id)
+        rpc_url, chain_id = get_chain_info('999', '888')
+        self.assertIsNone(rpc_url)
+        self.assertIsNone(chain_id)
 
 if __name__ == '__main__':
     unittest.main()

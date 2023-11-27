@@ -5,7 +5,7 @@
     "Parachain": "2900",
     "PalletInstance": "51",
     "ChainId": "667",
-    "rpc": "https://caladan.gorengine.com/own"
+    "rpc": ["https://caladan.gorengine.com/own"]
   },
   {
     "Name": "KLAOS",
@@ -13,6 +13,6 @@
     "Parachain": "3336",
     "PalletInstance": "51",
     "ChainId": "2718",
-    "rpc": "https://rpc.klaos.laosfoundation.io"
+    "rpc": ["https://rpc.klaos.laosfoundation.io"]
   }
 ]

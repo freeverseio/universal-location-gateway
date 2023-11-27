@@ -71,7 +71,7 @@ def get_chain_info(global_consensus, parachain):
                 entry.get("Parachain") == parachain):
             return entry.get('rpc'), entry.get('ChainId')
 
-    abort(400, description="Non supported consensus system")
+    return None, None
 
 
 # Function to get the tokenURI from a smart contract
