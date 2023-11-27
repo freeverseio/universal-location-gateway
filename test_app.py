@@ -22,6 +22,34 @@ class TestApp(unittest.TestCase):
         result = app.extract_between_parentheses('NonExisting', path_segments)
         self.assertIsNone(result)
 
+
+    def test_get_ul_fields_correct(self):
+        # Test with a valid path containing all fields
+        path = 'GlobalConsensus(123)/Parachain(456)/AccountKey20(0xABC123)/GeneralKey(789)'
+        global_consensus, parachain, account_key, general_key = app.get_ul_fields(path)
+        self.assertEqual(global_consensus, '123')
+        self.assertEqual(parachain, '456')
+        self.assertEqual(account_key, '0xABC123')
+        self.assertEqual(general_key, '789')
+
+    def test_get_ul_fields_missing_fields(self):
+        # Test with a path missing some fields
+        path = 'GlobalConsensus(123)/AccountKey20(0xABC123)'
+        global_consensus, parachain, account_key, general_key = app.get_ul_fields(path)
+        self.assertEqual(global_consensus, '123')
+        self.assertIsNone(parachain)
+        self.assertEqual(account_key, '0xABC123')
+        self.assertIsNone(general_key)
+
+    def test_get_ul_fields_empty_path(self):
+        # Test with an empty path
+        path = ''
+        global_consensus, parachain, account_key, general_key = app.get_ul_fields(path)
+        self.assertIsNone(global_consensus)
+        self.assertIsNone(parachain)
+        self.assertIsNone(account_key)
+        self.assertIsNone(general_key)
+
     @patch('app.load_config')
     def test_get_chain_info(self, mock_load_config):
         # Mock the load_config function
