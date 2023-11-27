@@ -110,7 +110,8 @@ def get_token_uri(rpc_urls, contract_address, asset_id):
     while attempts < num_rpc_urls:
         rpc_url = rpc_urls[attempts % num_rpc_urls]  # Round-robin selection
         web3 = Web3(Web3.HTTPProvider(rpc_url))
-        contract = web3.eth.contract(address=contract_address, abi=contract_abi)
+        checksum_address = web3.toChecksumAddress(contract_address)
+        contract = web3.eth.contract(address=checksum_address, abi=contract_abi)
         
         try:
             token_uri = contract.functions.tokenURI(int(asset_id)).call()
