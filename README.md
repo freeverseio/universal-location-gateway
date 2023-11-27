@@ -58,6 +58,12 @@ Or directly with python:
 $ python app.py
 ```
 
+To run tests locally:
+```bash
+$ pytest
+```
+
+
 When the server initiates, it logs the local server's URL (e.g., http://localhost:4000), where GET requests can be directed.
 
 ## Endpoints
