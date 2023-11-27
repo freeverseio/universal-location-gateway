@@ -50,6 +50,17 @@ class TestApp(unittest.TestCase):
         self.assertIsNone(account_key)
         self.assertIsNone(general_key)
 
+    def test_get_ul_fields_loose_to_permutations(self):
+        # Test with a path missing some fields
+        path1 = 'GlobalConsensus(123)/AccountKey20(0xABC123)'
+        path2 = 'GlobalConsensus(123)/AccountKey20(0xABC123)'
+        global_consensus1, _, account_key1, _ = app.get_ul_fields(path1)
+        global_consensus2, _, account_key2, _ = app.get_ul_fields(path2)
+        self.assertEqual(global_consensus1, '123')
+        self.assertEqual(global_consensus2, '123')
+        self.assertEqual(account_key1, '0xABC123')
+        self.assertEqual(account_key2, '0xABC123')
+
     @patch('app.load_config')
     def test_get_chain_info(self, mock_load_config):
         # Mock the load_config function
