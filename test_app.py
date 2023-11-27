@@ -32,8 +32,12 @@ class TestApp(unittest.TestCase):
         response = self.client.get('/invalid/path')
         self.assertEqual(response.status_code, 500)
 
-    def test_load_config(self):
+    def test_load_supported_consensus(self):
         config = load_supported_consensus()
+        self.assertIsNotNone(config)
+
+    def test_load_supported_ipfs(self):
+        config = load_supported_ipfs_gateways()
         self.assertIsNotNone(config)
 
     def test_extract_between_parentheses(self):
