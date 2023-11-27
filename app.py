@@ -183,7 +183,7 @@ def handle_request(path):
             abort(404, description="Token URI not found.")
 
         tokenUriStandard = determine_token_uri_standard(tokenUri)
-        if tokenUriStandard in ["ipfs", "unknown"]:  # TODO remove unknown when Bh fixes demo
+        if tokenUriStandard in ["ipfs"]:
             tokenURIResult = fetch_ipfs_data(tokenUri)
             if not tokenURIResult:
                 abort(502, description="Failed to fetch data from IPFS.")
