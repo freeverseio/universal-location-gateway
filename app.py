@@ -57,21 +57,6 @@ def get_ul_fields(path):
     # Return the extracted values in the expected order
     return tuple(values[key] for key in expected_order)
 
-def process_url_prefix(url):
-    """
-    Processes the given URL by removing specific starting characters if they are
-    with a list of valid prefixes. Aborts the process for any other formats.
-
-    :param url: The URL to process.
-    :return: The processed URL or aborts if the URL format is not valid.
-    """
-    supported_prefixes = ['uloc://', 'https://uloc.io/']
-    for prefix in supported_prefixes:
-        if url.startswith(prefix):
-            return url.replace(prefix, '', 1)
-    
-    abort(400, description="URL prefix not supported")
-
 # Define a function to get the RPC URL from the config given the global consensus and parachain
 def get_chain_info(global_consensus, parachain=""):
     """

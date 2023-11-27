@@ -70,14 +70,6 @@ class TestApp(unittest.TestCase):
             get_ul_fields(path)
         self.assertEqual(context.exception.code, 400)
 
-    def test_process_url_prefix(self):
-        self.assertEqual(process_url_prefix('uloc://example.com'), 'example.com')
-        self.assertEqual(process_url_prefix('https://uloc.io/path'), 'path')
-        # Test with an invalid prefix
-        with self.assertRaises(HTTPException) as context:
-            process_url_prefix('invalid://example.com')
-        self.assertEqual(context.exception.code, 400)
-
     @patch('app.load_config')
     def test_get_chain_info(self, mock_load_config):
         mock_load_config.return_value = {
