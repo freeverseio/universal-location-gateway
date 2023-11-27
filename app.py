@@ -8,9 +8,12 @@ import logging
 
 app = Flask(__name__)
 
-# Load the configuration data from the JSON file into a dictionary
-def load_config():
+def load_supported_consensus():
     with open('supportedConsensus.json', 'r') as config_file:
+        return json.load(config_file)
+
+def load_supported_ipfs_gateways():
+    with open('supportedIPFSGateways.json', 'r') as config_file:
         return json.load(config_file)
 
 # General function to extract content within parentheses after a specific keyword
@@ -65,7 +68,7 @@ def get_chain_info(global_consensus, parachain, pallet_instance):
     :param parachain: The parachain identifier.
     :return: A tuple containing the RPC URL and chain ID if found, or aborts with a 400 error if not found.
     """
-    config = load_config()  # Load the configuration
+    config = load_supported_consensus()  # Load the configuration
     for entry in config:
         if (entry.get("GlobalConsensus") == global_consensus and
                 entry.get("Parachain") == parachain and
@@ -131,8 +134,8 @@ def determine_token_uri_standard(tokenURI):
         return "unknown"
 
 def fetch_ipfs_data(token_uri):
-    config = load_config()  # Load the configuration data
-    ipfs_gateway = config.get('ipfsGateway', 'https://ipfs.io/ipfs/')  # Get the IPFS gateway from the config, default if not set
+    config = load_supported_ipfs_gateways()  # Load the configuration data
+    ipfs_gateway = config[0] # TODO: add support to loop over more than one
 
     # Check if the token URI starts with "ipfs://"
     if token_uri.startswith('ipfs://'):

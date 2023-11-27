@@ -33,7 +33,7 @@ class TestApp(unittest.TestCase):
         self.assertEqual(response.status_code, 500)
 
     def test_load_config(self):
-        config = load_config()
+        config = load_supported_consensus()
         self.assertIsNotNone(config)
 
     def test_extract_between_parentheses(self):
@@ -70,9 +70,9 @@ class TestApp(unittest.TestCase):
             get_ul_fields(path)
         self.assertEqual(context.exception.code, 400)
 
-    @patch('app.load_config')
+    @patch('app.load_supported_consensus')
     def test_get_chain_info(self, mock_load_config):
-        loaded_config = load_config()
+        loaded_config = load_supported_consensus()
         mock_load_config.return_value = loaded_config
 
         rpc_urls, chain_id = get_chain_info('3', '3336', '51')
