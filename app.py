@@ -79,10 +79,10 @@ def get_chain_info(global_consensus, parachain, pallet_instance):
 
 
 
-# Function to get the tokenURI from a smart contract
+# Function to get the token_uri from a smart contract
 def get_token_uri(rpc_urls, contract_address, asset_id):
     """
-    Call an EVM chain RPC nodes provided in round-robin fashion to get the tokenURI for a given 
+    Call an EVM chain RPC nodes provided in round-robin fashion to get the token_uri for a given 
     contract address and assetId. Retries up to the number of RPC URLs provided with a 1-second 
     delay between retries if an error occurs.
 
@@ -124,12 +124,12 @@ def get_token_uri(rpc_urls, contract_address, asset_id):
     logging.error("Failed to fetch token URI after trying all RPC URLs.")
     return None
 
-def determine_token_uri_standard(tokenURI):
-    if tokenURI.startswith('ipfs://'):
+def determine_token_uri_standard(token_uri):
+    if token_uri.startswith('ipfs://'):
         return "ipfs"
-    elif tokenURI.startswith('https://'):
+    elif token_uri.startswith('https://'):
         return "https"
-    elif tokenURI.startswith('http://'):
+    elif token_uri.startswith('http://'):
         return "http"
     else:
         return "unknown"
@@ -172,24 +172,24 @@ def handle_request(path):
         if not all([global_consensus, parachain, pallet_instance, account_key, general_key]):
             abort(400, description="Invalid URL format.")
 
-        rpcUrls, chainId = get_chain_info(global_consensus, parachain, pallet_instance)
+        rpc_urls, chain_id = get_chain_info(global_consensus, parachain, pallet_instance)
 
-        if not rpcUrls:
+        if not rpc_urls:
             abort(404, description="RPC URLs not found.")
 
-        tokenUri = get_token_uri(rpcUrls, account_key, general_key)
+        tokenUri = get_token_uri(rpc_urls, account_key, general_key)
         if not tokenUri:
             abort(404, description="Token URI not found.")
 
-        tokenUriStandard = determine_token_uri_standard(tokenUri)
-        if tokenUriStandard in ["ipfs"]:
-            tokenURIResult = fetch_ipfs_data(tokenUri)
-            if not tokenURIResult:
+        token_uri_standard = determine_token_uri_standard(tokenUri)
+        if token_uri_standard in ["ipfs"]:
+            token_uri_result = fetch_ipfs_data(tokenUri)
+            if not token_uri_result:
                 abort(502, description="Failed to fetch data from IPFS.")
         else:
             abort(400, description="Invalid token URI standard.")
 
-        return jsonify(tokenURIResult)
+        return jsonify(token_uri_result)
 
     except Exception as e:
         logging.error(f"An error occurred: {e}")
