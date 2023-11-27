@@ -137,15 +137,10 @@ def fetch_ipfs_data(token_uri):
     ipfs_gateways = load_supported_ipfs_gateways()  # Load the configuration data
     ipfs_gateway = ipfs_gateways[0] # TODO: add support to loop over more than one
 
-    # Check if the token URI starts with "ipfs://"
-    if token_uri.startswith('ipfs://'):
-        # Extract the CID and construct the URL with the IPFS gateway
-        cid = token_uri.split('ipfs://')[1]
-        token_uri = f'{ipfs_gateway}{cid}'
-    else:
-        # Assume the token URI is a direct CID and add it to the IPFS gateway URL
-        token_uri = f'{ipfs_gateway}{token_uri}'
-
+    # token_uri if forced to start with ipfs:// outside this method
+    # Extract the CID and construct the URL with the IPFS gateway
+    cid = token_uri.split('ipfs://')[1]
+    token_uri = f'{ipfs_gateway}{cid}'
     try:
         response = requests.get(token_uri)
         response.raise_for_status()  # Raises HTTPError for unsuccessful status codes
