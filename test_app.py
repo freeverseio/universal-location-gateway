@@ -1,6 +1,6 @@
 import unittest
 from app import *
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from werkzeug.exceptions import HTTPException
 
 class TestApp(unittest.TestCase):
@@ -86,6 +86,29 @@ class TestApp(unittest.TestCase):
         rpc_url, chain_id = get_chain_info('999', '888', '52')
         self.assertIsNone(rpc_url)
         self.assertIsNone(chain_id)
+
+    @patch('app.requests.get')
+    @patch('app.load_supported_ipfs_gateways')
+    def test_fetch_ipfs_data_success(self, mock_load_gateways, mock_requests_get):
+        loaded_config = load_supported_ipfs_gateways()
+        mock_load_gateways.return_value = loaded_config
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"data": "some data"}
+        mock_requests_get.return_value = mock_response
+
+        result = fetch_ipfs_data('ipfs://someCID')
+        self.assertEqual(result, {"data": "some data"})
+        mock_requests_get.assert_called_with('https://ipfs.io/ipfs/someCID')
+
+    @patch('app.requests.get')
+    @patch('app.load_supported_ipfs_gateways')
+    def test_fetch_ipfs_data_http_error(self, mock_load_gateways, mock_requests_get):
+        loaded_config = load_supported_ipfs_gateways()
+        mock_load_gateways.return_value = loaded_config
+        mock_requests_get.side_effect = requests.exceptions.HTTPError("Error")
+
+        result = fetch_ipfs_data('ipfs://someCID')
+        self.assertIsNone(result)
 
 if __name__ == '__main__':
     unittest.main()
