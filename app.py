@@ -31,23 +31,31 @@ def extract_between_parentheses(keyword, path_segments):
     return None
 
 def get_ul_fields(path):
+    """
+    Extracts and returns fields from the URL path, ensuring they are in the correct order:
+    GlobalConsensus, Parachain, AccountKey20, GeneralKey.
+    """
     # Split the path into segments for easier parsing
     path_segments = path.split('/')
 
-    # Call the extract_content function for each component
-    global_consensus = extract_between_parentheses('GlobalConsensus', path_segments)
-    parachain = extract_between_parentheses('Parachain', path_segments)
-    account_key = extract_between_parentheses('AccountKey20', path_segments)
-    general_key = extract_between_parentheses('GeneralKey', path_segments)
+    # Define the expected order of parameters
+    expected_order = ['GlobalConsensus', 'Parachain', 'AccountKey20', 'GeneralKey']
 
-    # Construct the response with the parsed data
-    response = {
-        "GlobalConsensus": global_consensus,
-        "Parachain": parachain,
-        "AccountKey20": account_key,
-        "GeneralKey": general_key
-    }
-    return(global_consensus, parachain, account_key, general_key)
+    # Initialize a dictionary to store extracted values
+    values = {key: None for key in expected_order}
+
+    # Iterate through the expected fields and extract values
+    for expected in expected_order:
+        value = extract_between_parentheses(expected, path_segments)
+        if value is None:
+            # If a parameter is missing or out of order, abort the request
+            abort(400, description=f"URL parameter '{expected}' is missing or not in the expected order.")
+
+        values[expected] = value
+        path_segments.pop(0)  # Remove the processed segment
+
+    # Return the extracted values in the expected order
+    return tuple(values[key] for key in expected_order)
 
 def process_url_prefix(url):
     """

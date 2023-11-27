@@ -24,29 +24,28 @@ class TestApp(unittest.TestCase):
         result = extract_between_parentheses('NonExisting', path_segments)
         self.assertIsNone(result)
 
-    def test_get_ul_fields_correct(self):
+    def test_get_ul_fields_correct_order(self):
         path = 'GlobalConsensus(123)/Parachain(456)/AccountKey20(0xABC123)/GeneralKey(789)'
-        global_consensus, parachain, account_key, general_key = get_ul_fields(path)
-        self.assertEqual(global_consensus, '123')
-        self.assertEqual(parachain, '456')
-        self.assertEqual(account_key, '0xABC123')
-        self.assertEqual(general_key, '789')
+        expected = ('123', '456', '0xABC123', '789')
+        self.assertEqual(get_ul_fields(path), expected)
 
-    def test_get_ul_fields_missing_fields(self):
-        path = 'GlobalConsensus(123)/AccountKey20(0xABC123)'
-        global_consensus, parachain, account_key, general_key = get_ul_fields(path)
-        self.assertEqual(global_consensus, '123')
-        self.assertIsNone(parachain)
-        self.assertEqual(account_key, '0xABC123')
-        self.assertIsNone(general_key)
+    def test_get_ul_fields_incorrect_order(self):
+        path = 'Parachain(456)/GlobalConsensus(123)/AccountKey20(0xABC123)/GeneralKey(789)'
+        with self.assertRaises(HTTPException) as context:
+            get_ul_fields(path)
+        self.assertEqual(context.exception.code, 400)
+    
+    def test_get_ul_fields_missing_field(self):
+        path = 'GlobalConsensus(123)/AccountKey20(0xABC123)/GeneralKey(789)'
+        with self.assertRaises(HTTPException) as context:
+            get_ul_fields(path)
+        self.assertEqual(context.exception.code, 400)
 
     def test_get_ul_fields_empty_path(self):
         path = ''
-        global_consensus, parachain, account_key, general_key = get_ul_fields(path)
-        self.assertIsNone(global_consensus)
-        self.assertIsNone(parachain)
-        self.assertIsNone(account_key)
-        self.assertIsNone(general_key)
+        with self.assertRaises(HTTPException) as context:
+            get_ul_fields(path)
+        self.assertEqual(context.exception.code, 400)
 
     def test_process_url_prefix(self):
         self.assertEqual(process_url_prefix('uloc://example.com'), 'example.com')
