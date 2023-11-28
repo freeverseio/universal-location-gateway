@@ -65,8 +65,13 @@ To run tests locally:
 $ pytest
 ```
 
-
 When the server initiates, it logs the local server's URL (e.g., http://localhost:4000), where GET requests can be directed.
+
+The following command line test should return the json metadata of an NFT:
+```bash
+$ curl "http://localhost:5000/GlobalConsensus(0:0x22c48a576c33970622a2b4686a8aa5e4b58350247d69fb5d8015f12a8c8e1e4c)/Parachain(2900)/PalletInstance(51)/AccountKey20(0xFfFfFffFFFfFfffffFffffFE000000000000019B)/GeneralKey(12796973513728968649507037946452129632593805247333748)"
+```  
+
 
 ## Endpoints
 - `GET /<path>`: Parses the given path as a universal location and returns the asset data.
