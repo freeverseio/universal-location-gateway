@@ -1,3 +1,6 @@
 [
-  "https://ipfs.io/ipfs/"
+  {
+    "url": "https://ipfs.io/ipfs/",
+    "apiKeySuffix": ""
+  }
 ]

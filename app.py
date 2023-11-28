@@ -136,7 +136,7 @@ def determine_token_uri_standard(token_uri):
 
 def fetch_ipfs_data(token_uri):
     ipfs_gateways = load_supported_ipfs_gateways()  # Load the configuration data
-    ipfs_gateway = ipfs_gateways[0] # TODO: add support to loop over more than one
+    ipfs_gateway = ipfs_gateways[0].get("url") # TODO: add support to loop over more than one
 
     # token_uri if forced to start with ipfs:// outside this method
     # Extract the CID and construct the URL with the IPFS gateway
