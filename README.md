@@ -13,9 +13,7 @@ This Flask application serves as a gateway to fetch and return blockchain asset 
 Currently:
 - it only supports `tokenURI` that returns an ipfs address.
 - it only supports ipfs addresses that return strings that can be parsed as a json object, explicitly, via the `jsonify` method.
-- it only supports locations in Polkadot, i.e. it reverts if the `Parachain` junction is not provided.
-- the parsing of the universal location path does not take order into account, e.g. the `GlobalConsensus` keyword can be placed at the end of the path.
- 
+- it only supports locations in Polkadot, i.e. it reverts if the `Parachain` and `PalletInstance` junctions are not provided.
 
 ## Requirements
 
@@ -27,23 +25,27 @@ To run this project, you'll need:
 
 
 ## Configuration
-The project requires a `config.json`` file to define mappings for global consensus parameters, with the following structure:
+The project requires a `supportedConsensus.json` file to define mappings for global consensus parameters, with the following structure:
 
 ```json
-{
-    "GlobalConsensusMappings": {
-        "consensus_key": {
-            "relayChainName": "Relay Chain Name",
-            "Parachains": {
-                "parachain_key": {
-                    "name": "Parachain Name",
-                    "rpc": "RPC URL",
-                    "chainId": "Chain ID"
-                }
-            }
-        }
-    }
-}
+[
+  {
+    "Name": "Caladan",
+    "GlobalConsensus": "0:0x22c48a576c33970622a2b4686a8aa5e4b58350247d69fb5d8015f12a8c8e1e4c",
+    "Parachain": "2900",
+    "PalletInstance": "51",
+    "ChainId": "667",
+    "rpc": ["https://caladan.gorengine.com/own"]
+  },
+  {
+    "Name": "KLAOS",
+    "GlobalConsensus": "3",
+    "Parachain": "3336",
+    "PalletInstance": "51",
+    "ChainId": "2718",
+    "rpc": ["https://rpc.klaos.laosfoundation.io"]
+  }
+]
 ```
 
 ## Usage

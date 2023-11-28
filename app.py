@@ -8,9 +8,12 @@ import logging
 
 app = Flask(__name__)
 
-# Load the configuration data from the JSON file into a dictionary
-def load_config():
-    with open('config.json', 'r') as config_file:
+def load_supported_consensus():
+    with open('supportedConsensus.json', 'r') as config_file:
+        return json.load(config_file)
+
+def load_supported_ipfs_gateways():
+    with open('supportedIPFSGateways.json', 'r') as config_file:
         return json.load(config_file)
 
 # General function to extract content within parentheses after a specific keyword
@@ -39,7 +42,7 @@ def get_ul_fields(path):
     path_segments = path.split('/')
 
     # Define the expected order of parameters
-    expected_order = ['GlobalConsensus', 'Parachain', 'AccountKey20', 'GeneralKey']
+    expected_order = ['GlobalConsensus', 'Parachain', 'PalletInstance', 'AccountKey20', 'GeneralKey']
 
     # Initialize a dictionary to store extracted values
     values = {key: None for key in expected_order}
@@ -57,24 +60,29 @@ def get_ul_fields(path):
     # Return the extracted values in the expected order
     return tuple(values[key] for key in expected_order)
 
-# Define a function to get the RPC URL from the config given the global consensus and parachain
-def get_chain_info(global_consensus, parachain=""):
+def get_chain_info(global_consensus, parachain, pallet_instance):
     """
-    Get the RPC URL from the configuration based on the global consensus and parachain.
+    Get the RPC URL and chain ID from the configuration based on the global consensus and parachain.
 
     :param global_consensus: The global consensus identifier.
     :param parachain: The parachain identifier.
-    :return: The RPC URL if found, or None if not found.
+    :return: A tuple containing the RPC URL and chain ID if found, or aborts with a 400 error if not found.
     """
-    config = load_config()  # Load the configuration
-    consensus_config = config.get('GlobalConsensusMappings', {}).get(global_consensus, {})
-    parachain_config = consensus_config.get('Parachains', {}).get(parachain, {})
-    return parachain_config.get('rpc'), parachain_config.get('chainId')  # Return the RPC URL or None if not found
+    supported_consensus = load_supported_consensus()  # Load the configuration
+    for entry in supported_consensus:
+        if (entry.get("GlobalConsensus") == global_consensus and
+                entry.get("Parachain") == parachain and
+                entry.get("PalletInstance") == pallet_instance):
+            return entry.get('rpc'), entry.get('ChainId')
 
-# Function to get the tokenURI from a smart contract
+    return None, None
+
+
+
+# Function to get the token_uri from a smart contract
 def get_token_uri(rpc_urls, contract_address, asset_id):
     """
-    Call an EVM chain RPC nodes provided in round-robin fashion to get the tokenURI for a given 
+    Call an EVM chain RPC nodes provided in round-robin fashion to get the token_uri for a given 
     contract address and assetId. Retries up to the number of RPC URLs provided with a 1-second 
     delay between retries if an error occurs.
 
@@ -102,7 +110,8 @@ def get_token_uri(rpc_urls, contract_address, asset_id):
     while attempts < num_rpc_urls:
         rpc_url = rpc_urls[attempts % num_rpc_urls]  # Round-robin selection
         web3 = Web3(Web3.HTTPProvider(rpc_url))
-        contract = web3.eth.contract(address=contract_address, abi=contract_abi)
+        checksum_address = web3.toChecksumAddress(contract_address)
+        contract = web3.eth.contract(address=checksum_address, abi=contract_abi)
         
         try:
             token_uri = contract.functions.tokenURI(int(asset_id)).call()
@@ -115,29 +124,24 @@ def get_token_uri(rpc_urls, contract_address, asset_id):
     logging.error("Failed to fetch token URI after trying all RPC URLs.")
     return None
 
-def determine_token_uri_standard(tokenURI):
-    if tokenURI.startswith('ipfs://'):
+def determine_token_uri_standard(token_uri):
+    if token_uri.startswith('ipfs://'):
         return "ipfs"
-    elif tokenURI.startswith('https://'):
+    elif token_uri.startswith('https://'):
         return "https"
-    elif tokenURI.startswith('http://'):
+    elif token_uri.startswith('http://'):
         return "http"
     else:
         return "unknown"
 
 def fetch_ipfs_data(token_uri):
-    config = load_config()  # Load the configuration data
-    ipfs_gateway = config.get('ipfsGateway', 'https://ipfs.io/ipfs/')  # Get the IPFS gateway from the config, default if not set
+    ipfs_gateways = load_supported_ipfs_gateways()  # Load the configuration data
+    ipfs_gateway = ipfs_gateways[0] # TODO: add support to loop over more than one
 
-    # Check if the token URI starts with "ipfs://"
-    if token_uri.startswith('ipfs://'):
-        # Extract the CID and construct the URL with the IPFS gateway
-        cid = token_uri.split('ipfs://')[1]
-        token_uri = f'{ipfs_gateway}{cid}'
-    else:
-        # Assume the token URI is a direct CID and add it to the IPFS gateway URL
-        token_uri = f'{ipfs_gateway}{token_uri}'
-
+    # token_uri if forced to start with ipfs:// outside this method
+    # Extract the CID and construct the URL with the IPFS gateway
+    cid = token_uri.split('ipfs://')[1]
+    token_uri = f'{ipfs_gateway}{cid}'
     try:
         response = requests.get(token_uri)
         response.raise_for_status()  # Raises HTTPError for unsuccessful status codes
@@ -164,27 +168,28 @@ def handle_exception(e):
 @app.route('/<path:path>', methods=['GET'])
 def handle_request(path):
     try:
-        global_consensus, parachain, account_key, general_key = get_ul_fields(path)
-        if not all([global_consensus, parachain, account_key, general_key]):
+        global_consensus, parachain, pallet_instance, account_key, general_key = get_ul_fields(path)
+        if not all([global_consensus, parachain, pallet_instance, account_key, general_key]):
             abort(400, description="Invalid URL format.")
 
-        rpcUrls, chainId = get_chain_info(global_consensus, parachain)
-        if not rpcUrls:
+        rpc_urls, chain_id = get_chain_info(global_consensus, parachain, pallet_instance)
+
+        if not rpc_urls:
             abort(404, description="RPC URLs not found.")
 
-        tokenUri = get_token_uri(rpcUrls, account_key, general_key)
+        tokenUri = get_token_uri(rpc_urls, account_key, general_key)
         if not tokenUri:
             abort(404, description="Token URI not found.")
 
-        tokenUriStandard = determine_token_uri_standard(tokenUri)
-        if tokenUriStandard in ["ipfs", "unknown"]:  # TODO remove unknown when Bh fixes demo
-            tokenURIResult = fetch_ipfs_data(tokenUri)
-            if not tokenURIResult:
+        token_uri_standard = determine_token_uri_standard(tokenUri)
+        if token_uri_standard in ["ipfs"]:
+            token_uri_result = fetch_ipfs_data(tokenUri)
+            if not token_uri_result:
                 abort(502, description="Failed to fetch data from IPFS.")
         else:
             abort(400, description="Invalid token URI standard.")
 
-        return jsonify(tokenURIResult)
+        return jsonify(token_uri_result)
 
     except Exception as e:
         logging.error(f"An error occurred: {e}")
