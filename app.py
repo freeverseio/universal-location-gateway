@@ -135,23 +135,28 @@ def determine_token_uri_standard(token_uri):
         return "unknown"
 
 def fetch_ipfs_data(token_uri):
-    ipfs_gateways = load_supported_ipfs_gateways()  # Load the configuration data
-    ipfs_gateway = ipfs_gateways[0].get("url") # TODO: add support to loop over more than one
-
     # token_uri if forced to start with ipfs:// outside this method
     # Extract the CID and construct the URL with the IPFS gateway
     cid = token_uri.split('ipfs://')[1]
-    token_uri = f'{ipfs_gateway}{cid}'
-    try:
-        response = requests.get(token_uri)
-        response.raise_for_status()  # Raises HTTPError for unsuccessful status codes
-        return response.json()
-    except requests.exceptions.HTTPError as http_err:
-        logging.error(f"HTTP error occurred: {http_err}")
-        return None
-    except Exception as err:
-        logging.error(f"An error occurred: {err}")
-        return None
+
+    ipfs_gateways = load_supported_ipfs_gateways()  # Load the configuration data
+    for gateway in ipfs_gateways:
+        ipfs_gateway_url = gateway.get("url")
+        full_uri = f'{ipfs_gateway_url}{cid}'
+        try:
+            response = requests.get(full_uri)
+            response.raise_for_status()  # Raises HTTPError for unsuccessful status codes
+            return response.json()
+        except requests.exceptions.HTTPError as http_err:
+            logging.error(f"HTTP error occurred with {full_uri}: {http_err}")
+            # Continue to the next gateway if this one fails
+        except Exception as err:
+            logging.error(f"An error occurred with {full_uri}: {err}")
+            # Continue to the next gateway if this one fails
+
+    logging.error("Failed to fetch data from all IPFS gateways.")
+    return None
+
 
 @app.errorhandler(Exception)
 def handle_exception(e):
