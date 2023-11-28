@@ -5,6 +5,7 @@ from web3 import Web3
 import requests
 import time
 import logging
+import os
 
 app = Flask(__name__)
 
@@ -14,7 +15,16 @@ def load_supported_consensus():
 
 def load_supported_ipfs_gateways():
     with open('supportedIPFSGateways.json', 'r') as config_file:
-        return json.load(config_file)
+        ipfs_gateways = json.load(config_file)
+
+    private_file_path = 'supportedIPFSGatewaysPrivate.json'
+    if not os.path.exists(private_file_path):
+        return ipfs_gateways
+    
+    with open(private_file_path, 'r') as config_file:
+        ipfs_gateways_private = json.load(config_file)
+
+    return ipfs_gateways + ipfs_gateways_private
 
 # General function to extract content within parentheses after a specific keyword
 def extract_between_parentheses(keyword, path_segments):
@@ -142,7 +152,9 @@ def fetch_ipfs_data(token_uri):
     ipfs_gateways = load_supported_ipfs_gateways()  # Load the configuration data
     for gateway in ipfs_gateways:
         ipfs_gateway_url = gateway.get("url")
-        full_uri = f'{ipfs_gateway_url}{cid}'
+        # example of suffix = "?pinataGatewayToken=2z....Nk" 
+        apyKeySuffix = gateway.get("apiKeySuffix")
+        full_uri = f'{ipfs_gateway_url}{cid}{apyKeySuffix}'
         try:
             response = requests.get(full_uri)
             response.raise_for_status()  # Raises HTTPError for unsuccessful status codes
