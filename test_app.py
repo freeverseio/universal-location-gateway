@@ -21,7 +21,7 @@ class TestApp(unittest.TestCase):
         mock_fetch_ipfs_data.return_value = {'data': 'some data'}
 
         response = self.client.get('/GlobalConsensus(123)/Parachain(456)/AccountKey20(0xABC123)/GeneralKey(789)')
-        self.assertEqual(response.status_code, 3200)
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json, {'data': 'some data'})
 
     @patch('app.get_ul_fields')
