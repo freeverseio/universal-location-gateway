@@ -160,10 +160,10 @@ def fetch_ipfs_data(token_uri):
             response.raise_for_status()  # Raises HTTPError for unsuccessful status codes
             return response.json()
         except requests.exceptions.HTTPError as http_err:
-            logging.error(f"HTTP error occurred with {full_uri}: {http_err}")
+            logging.error(f"HTTP error occurred with {ipfs_gateway_url}: {http_err}")
             # Continue to the next gateway if this one fails
         except Exception as err:
-            logging.error(f"An error occurred with {full_uri}: {err}")
+            logging.error(f"An error occurred with {ipfs_gateway_url}: {err}")
             # Continue to the next gateway if this one fails
 
     logging.error("Failed to fetch data from all IPFS gateways.")
