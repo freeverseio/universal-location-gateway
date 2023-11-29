@@ -24,7 +24,7 @@ def load_supported_ipfs_gateways():
     with open(private_file_path, 'r') as config_file:
         ipfs_gateways_private = json.load(config_file)
 
-    return ipfs_gateways + ipfs_gateways_private
+    return ipfs_gateways_private + ipfs_gateways
 
 # General function to extract content within parentheses after a specific keyword
 def extract_between_parentheses(keyword, path_segments):
