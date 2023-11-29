@@ -7,6 +7,16 @@ This Flask application serves as a gateway to fetch and return blockchain asset 
 - Parses URLs to extract blockchain-related parameters, following the [Universal Location Specification] (https://github.com/freeverseio/laos/issues/177)
 - Retrieves blockchain asset data from EVM-compatible chains connecting to the corresponding RPC nodes.
 - Fetches and returns IPFS-hosted metadata.
+- It supports private IPFS providers. Create the file `./supportedIPFSGatewaysPrivate.json` with content such as:
+
+```
+[
+  {
+    "url": "https://ul-gateway.mypinata.cloud/ipfs/",
+    "apiKeySuffix": "?pinataGatewayToken=2z....Nk"
+  }
+]
+```
 
 ## Limitations
 

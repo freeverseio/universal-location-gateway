@@ -5,6 +5,7 @@ from web3 import Web3
 import requests
 import time
 import logging
+import os
 
 app = Flask(__name__)
 
@@ -14,7 +15,16 @@ def load_supported_consensus():
 
 def load_supported_ipfs_gateways():
     with open('supportedIPFSGateways.json', 'r') as config_file:
-        return json.load(config_file)
+        ipfs_gateways = json.load(config_file)
+
+    private_file_path = 'supportedIPFSGatewaysPrivate.json'
+    if not os.path.exists(private_file_path):
+        return ipfs_gateways
+    
+    with open(private_file_path, 'r') as config_file:
+        ipfs_gateways_private = json.load(config_file)
+
+    return ipfs_gateways_private + ipfs_gateways
 
 # General function to extract content within parentheses after a specific keyword
 def extract_between_parentheses(keyword, path_segments):
@@ -135,23 +145,30 @@ def determine_token_uri_standard(token_uri):
         return "unknown"
 
 def fetch_ipfs_data(token_uri):
-    ipfs_gateways = load_supported_ipfs_gateways()  # Load the configuration data
-    ipfs_gateway = ipfs_gateways[0] # TODO: add support to loop over more than one
-
     # token_uri if forced to start with ipfs:// outside this method
     # Extract the CID and construct the URL with the IPFS gateway
     cid = token_uri.split('ipfs://')[1]
-    token_uri = f'{ipfs_gateway}{cid}'
-    try:
-        response = requests.get(token_uri)
-        response.raise_for_status()  # Raises HTTPError for unsuccessful status codes
-        return response.json()
-    except requests.exceptions.HTTPError as http_err:
-        logging.error(f"HTTP error occurred: {http_err}")
-        return None
-    except Exception as err:
-        logging.error(f"An error occurred: {err}")
-        return None
+
+    ipfs_gateways = load_supported_ipfs_gateways()  # Load the configuration data
+    for gateway in ipfs_gateways:
+        ipfs_gateway_url = gateway.get("url")
+        # example of suffix = "?pinataGatewayToken=2z....Nk" 
+        apiKeySuffix = gateway.get("apiKeySuffix")
+        full_uri = f'{ipfs_gateway_url}{cid}{apiKeySuffix}'
+        try:
+            response = requests.get(full_uri)
+            response.raise_for_status()  # Raises HTTPError for unsuccessful status codes
+            return response.json()
+        except requests.exceptions.HTTPError as http_err:
+            logging.error(f"HTTP error occurred with {ipfs_gateway_url}: {http_err}")
+            # Continue to the next gateway if this one fails
+        except Exception as err:
+            logging.error(f"An error occurred with {ipfs_gateway_url}: {err}")
+            # Continue to the next gateway if this one fails
+
+    logging.error("Failed to fetch data from all IPFS gateways.")
+    return None
+
 
 @app.errorhandler(Exception)
 def handle_exception(e):
