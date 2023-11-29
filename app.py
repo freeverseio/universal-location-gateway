@@ -153,8 +153,8 @@ def fetch_ipfs_data(token_uri):
     for gateway in ipfs_gateways:
         ipfs_gateway_url = gateway.get("url")
         # example of suffix = "?pinataGatewayToken=2z....Nk" 
-        apyKeySuffix = gateway.get("apiKeySuffix")
-        full_uri = f'{ipfs_gateway_url}{cid}{apyKeySuffix}'
+        apiKeySuffix = gateway.get("apiKeySuffix")
+        full_uri = f'{ipfs_gateway_url}{cid}{apiKeySuffix}'
         try:
             response = requests.get(full_uri)
             response.raise_for_status()  # Raises HTTPError for unsuccessful status codes
