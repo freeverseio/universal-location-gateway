@@ -1,4 +1,5 @@
-from flask import Flask, jsonify, abort
+from flask import Flask, jsonify, abort, send_from_directory, request
+from flask_cors import CORS
 import re
 import json
 from web3 import Web3
@@ -8,6 +9,7 @@ import logging
 import os
 
 app = Flask(__name__)
+CORS(app)
 
 def load_supported_consensus():
     with open('supportedConsensus.json', 'r') as config_file:
@@ -182,6 +184,11 @@ def handle_exception(e):
     response.content_type = "application/json"
     return response
 
+@app.route('/robots.txt')
+@app.route('/favicon.ico')
+def static_from_root():
+    return send_from_directory(app.static_folder, request.path[1:])
+
 @app.route('/<path:path>', methods=['GET'])
 def handle_request(path):
     try:
@@ -213,4 +220,4 @@ def handle_request(path):
         abort(500, description="Internal Server Error")
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(host='0.0.0.0', port=8080, debug=False)
