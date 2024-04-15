@@ -14,5 +14,13 @@
     "PalletInstance": "51",
     "ChainId": "2718",
     "rpc": ["https://rpc.klaos.laosfoundation.io"]
+  },
+  {
+    "Name": "KLAOS Nova",
+    "GlobalConsensus": "0:0xbefcb1a5ce9db8d0a9f02b54280d7fb3684c5f8c8cd33a5ad8dd34e93f47891f",
+    "Parachain": "2001",
+    "PalletInstance": "51",
+    "ChainId": "27181",
+    "rpc": ["https://rpc.klaosnova.laosfoundation.io"]
   }
 ]
