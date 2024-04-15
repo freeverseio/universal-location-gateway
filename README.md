@@ -59,6 +59,11 @@ The project requires a `supportedConsensus.json` file to define mappings for glo
 ```
 
 ## Usage
+Install:
+```bash
+$ pip install -r requirements.txt
+```
+
 To start the application, run:
 
 ```bash
