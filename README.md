@@ -80,12 +80,7 @@ To run tests locally:
 $ pytest
 ```
 
-When the server initiates, it logs the local server's URL (e.g., http://localhost:4000), where GET requests can be directed.
-
-The following command line test should return the json metadata of an NFT:
-```bash
-$ curl "http://localhost:5000/GlobalConsensus(0:0x22c48a576c33970622a2b4686a8aa5e4b58350247d69fb5d8015f12a8c8e1e4c)/Parachain(2900)/PalletInstance(51)/AccountKey20(0xFfFfFffFFFfFfffffFffffFE000000000000019B)/GeneralKey(12796973513728968649507037946452129632593805247333748)"
-```  
+When the server initiates, it logs the local server's URL (e.g., http://127.0.0.1:5000), where GET requests can be directed.
 
 
 ## Endpoints
@@ -94,7 +89,11 @@ $ curl "http://localhost:5000/GlobalConsensus(0:0x22c48a576c33970622a2b4686a8aa5
 ## Testing
 The functionality can be tested by using curl or any API client like Postman.
 
-Example request:
+The following command line test should return the json metadata of an NFT on **LAOS Omega**:
 ```bash
-$ curl "http://localhost:4000/GlobalConsensus(your_global_consensus)/Parachain(your_parachain)/AccountKey20(your_account_key)/GeneralKey(your_general_key)"
-```
+$ curl "http://127.0.0.1:5000/GlobalConsensus(0:0x77afd6190f1554ad45fd0d31aee62aacc33c6db0ea801129acb813f913e0764f)/Parachain(4006)/PalletInstance(51)/AccountKey20(0xfffffffffffffffffffffffe0000000000000003)/GeneralKey(325917147656465124478929238789824840301443494732)"
+```  
+The following command line test should return the json metadata of an NFT on **LAOS Sun**:
+```bash
+$ curl "http://127.0.0.1:5000/GlobalConsensus(0:0x4756c4042a431ad2bbe61d8c4b966c1328e7a8daa0110e9bbd3d4013138a0bd4)/Parachain(2000)/PalletInstance(51)/AccountKey20(0xfFFFFFfFFffFFfffFFFffffE0000000000000022)/GeneralKey(325917147656465124478929238789824840301443494732)"
+```  
