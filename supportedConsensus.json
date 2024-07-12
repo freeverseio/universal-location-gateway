@@ -22,5 +22,21 @@
     "PalletInstance": "51",
     "ChainId": "27181",
     "rpc": ["https://rpc.klaosnova.laosfoundation.io"]
+  },
+  {
+    "Name": "LAOS Sun",
+    "GlobalConsensus": "0:0x4756c4042a431ad2bbe61d8c4b966c1328e7a8daa0110e9bbd3d4013138a0bd4",
+    "Parachain": "2000",
+    "PalletInstance": "51",
+    "ChainId": "6000",
+    "rpc": ["https://rpc.laossun.gorengine.com"]
+  },
+  {
+    "Name": "LAOS Omega",
+    "GlobalConsensus": "0:0x77afd6190f1554ad45fd0d31aee62aacc33c6db0ea801129acb813f913e0764f",
+    "Parachain": "4006",
+    "PalletInstance": "51",
+    "ChainId": "62831",
+    "rpc": ["https://rpc.laosomega.laosfoundation.io"]
   }
 ]
