@@ -32,11 +32,19 @@
     "rpc": ["https://rpc.laossun.gorengine.com"]
   },
   {
-    "Name": "LAOS Omega",
+    "Name": "LAOS Sigma",
     "GlobalConsensus": "0:0x77afd6190f1554ad45fd0d31aee62aacc33c6db0ea801129acb813f913e0764f",
     "Parachain": "4006",
     "PalletInstance": "51",
-    "ChainId": "62831",
-    "rpc": ["https://rpc.laosomega.laosfoundation.io"]
+    "ChainId": "62850",
+    "rpc": ["https://rpc.laossigma.laosfoundation.io"]
+  },
+  {
+    "Name": "LAOS Mainnet",
+    "GlobalConsensus": "2",
+    "Parachain": "3370",
+    "PalletInstance": "51",
+    "ChainId": "6283",
+    "rpc": ["https://rpc.laos.laosfoundation.io"]
   }
 ]
