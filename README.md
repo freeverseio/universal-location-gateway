@@ -40,20 +40,20 @@ The project requires a `supportedConsensus.json` file to define mappings for glo
 ```json
 [
   {
-    "Name": "Caladan",
-    "GlobalConsensus": "0:0x22c48a576c33970622a2b4686a8aa5e4b58350247d69fb5d8015f12a8c8e1e4c",
-    "Parachain": "2900",
+    "Name": "LAOS Sigma",
+    "GlobalConsensus": "0:0x77afd6190f1554ad45fd0d31aee62aacc33c6db0ea801129acb813f913e0764f",
+    "Parachain": "4006",
     "PalletInstance": "51",
-    "ChainId": "667",
-    "rpc": ["https://caladan.gorengine.com/own"]
+    "ChainId": "62850",
+    "rpc": ["https://rpc.laossigma.laosfoundation.io"]
   },
   {
-    "Name": "KLAOS",
-    "GlobalConsensus": "3",
-    "Parachain": "3336",
+    "Name": "LAOS Mainnet",
+    "GlobalConsensus": "2",
+    "Parachain": "3370",
     "PalletInstance": "51",
-    "ChainId": "2718",
-    "rpc": ["https://rpc.klaos.laosfoundation.io"]
+    "ChainId": "6283",
+    "rpc": ["https://rpc.laos.laosfoundation.io"]
   }
 ]
 ```
@@ -80,12 +80,7 @@ To run tests locally:
 $ pytest
 ```
 
-When the server initiates, it logs the local server's URL (e.g., http://localhost:4000), where GET requests can be directed.
-
-The following command line test should return the json metadata of an NFT:
-```bash
-$ curl "http://localhost:5000/GlobalConsensus(0:0x22c48a576c33970622a2b4686a8aa5e4b58350247d69fb5d8015f12a8c8e1e4c)/Parachain(2900)/PalletInstance(51)/AccountKey20(0xFfFfFffFFFfFfffffFffffFE000000000000019B)/GeneralKey(12796973513728968649507037946452129632593805247333748)"
-```  
+When the server initiates, it logs the local server's URL (e.g., http://127.0.0.1:5000), where GET requests can be directed.
 
 
 ## Endpoints
@@ -94,7 +89,7 @@ $ curl "http://localhost:5000/GlobalConsensus(0:0x22c48a576c33970622a2b4686a8aa5
 ## Testing
 The functionality can be tested by using curl or any API client like Postman.
 
-Example request:
+The following command line test should return the json metadata of an NFT on **LAOS Sigma**:
 ```bash
-$ curl "http://localhost:4000/GlobalConsensus(your_global_consensus)/Parachain(your_parachain)/AccountKey20(your_account_key)/GeneralKey(your_general_key)"
-```
+$ curl "http://127.0.0.1:5000/GlobalConsensus(0:0x77afd6190f1554ad45fd0d31aee62aacc33c6db0ea801129acb813f913e0764f)/Parachain(4006)/PalletInstance(51)/AccountKey20(0xfffffffffffffffffffffffe0000000000000004)/GeneralKey(34560331594530882314307165352126634424401996839473067194454284012200635144743)"
+```  
