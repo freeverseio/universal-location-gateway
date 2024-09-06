@@ -7,6 +7,7 @@ import requests
 import time
 import logging
 import os
+from werkzeug.exceptions import HTTPException
 
 app = Flask(__name__)
 CORS(app)
@@ -216,8 +217,9 @@ def handle_request(path):
         return jsonify(token_uri_result)
 
     except Exception as e:
+        # Let Flask handle the HTTP exceptions as intended (e.g., 400, 404, etc.)
         logging.error(f"An error occurred: {e}")
-        abort(500, description="Internal Server Error")
+        raise e
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=False)

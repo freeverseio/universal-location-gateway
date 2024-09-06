@@ -110,5 +110,49 @@ class TestApp(unittest.TestCase):
         result = fetch_ipfs_data('ipfs://someCID')
         self.assertIsNone(result)
 
+    @patch('app.get_ul_fields')
+    @patch('app.get_chain_info')
+    @patch('app.get_token_uri')
+    def test_handle_request_unsupported_https_token_uri(self, mock_get_token_uri, mock_get_chain_info, mock_get_ul_fields):
+        # Mock the functions to return expected values
+        mock_get_ul_fields.return_value = ('3', '3336', '51', '0xABC123', '789')
+        mock_get_chain_info.return_value = (['http://example.com'], 1)
+        mock_get_token_uri.return_value = 'https://tokenUri'
+
+        # Perform the GET request to the endpoint
+        response = self.client.get('/GlobalConsensus(123)/Parachain(456)/AccountKey20(0xABC123)/GeneralKey(789)')
+
+        # Check that the response status code is 400
+        self.assertEqual(response.status_code, 400)
+
+        # Assert the response contains the expected error message
+        self.assertIn(b"Invalid token URI standard.", response.data)
+
+        # Assert the content type is application/json
+        self.assertEqual(response.content_type, "application/json")
+
+    @patch('app.get_ul_fields')
+    @patch('app.get_chain_info')
+    @patch('app.get_token_uri')
+    def test_handle_request_unsupported_https_token_uri(self, mock_get_token_uri, mock_get_chain_info, mock_get_ul_fields):
+        # Mock the functions to return expected values
+        mock_get_ul_fields.return_value = ('3', '3336', '51', '0xABC123', '789')
+        mock_get_chain_info.return_value = (['http://example.com'], 1)
+        mock_get_token_uri.return_value = 'http://tokenUri'
+
+        # Perform the GET request to the endpoint
+        response = self.client.get('/GlobalConsensus(123)/Parachain(456)/AccountKey20(0xABC123)/GeneralKey(789)')
+
+        # Check that the response status code is 400
+        self.assertEqual(response.status_code, 400)
+
+        # Assert the response contains the expected error message
+        self.assertIn(b"Invalid token URI standard.", response.data)
+
+        # Assert the content type is application/json
+        self.assertEqual(response.content_type, "application/json")
+
+
+
 if __name__ == '__main__':
     unittest.main()
