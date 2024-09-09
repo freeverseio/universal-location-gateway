@@ -4,10 +4,17 @@ This Flask application serves as a gateway to fetch and return blockchain asset 
 
 ## Features
 
-- Parses URLs to extract blockchain-related parameters, following the [Universal Location Specification] (https://github.com/freeverseio/laos/issues/177)
-- Retrieves blockchain asset data from EVM-compatible chains connecting to the corresponding RPC nodes.
-- Fetches and returns IPFS-hosted metadata.
-- It supports private IPFS providers. Create the file `./supportedIPFSGatewaysPrivate.json` with content such as:
+- It parses the provided URL to extract blockchain-related parameters, following the [Universal Location Specification] (https://github.com/freeverseio/laos/issues/177). In particular, it tries to parse:
+  - the blockchain
+  - the contract address inside that blockchain
+  - the `tokenId` created within that contract
+
+- It then queries `tokenURI(tokenId)` in the parsed contract, and:
+  - if `tokenURI` points to `ipfs://` it returns the content of that IPFS address
+  - else, if `tokenURI` points to a valid URL, it returns the response of the server at that URL,
+  - else, it returns the raw string returned by `tokenURI(tokenId)`.  
+
+- It supports private IPFS providers. To set up your own provider, create the file `./supportedIPFSGatewaysPrivate.json` with content such as:
 
 ```
 [
@@ -21,8 +28,6 @@ This Flask application serves as a gateway to fetch and return blockchain asset 
 ## Limitations
 
 Currently:
-- it only supports `tokenURI` that returns an ipfs address.
-- it only supports ipfs addresses that return strings that can be parsed as a json object, explicitly, via the `jsonify` method.
 - it only supports locations in Polkadot, i.e. it reverts if the `Parachain` and `PalletInstance` junctions are not provided.
 
 ## Requirements
