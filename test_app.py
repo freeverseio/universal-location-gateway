@@ -12,13 +12,13 @@ class TestApp(unittest.TestCase):
     @patch('app.get_ul_fields')
     @patch('app.get_chain_info')
     @patch('app.get_token_uri')
-    @patch('app.fetch_ipfs_data')
-    def test_handle_request_success(self, mock_fetch_ipfs_data, mock_get_token_uri, mock_get_chain_info, mock_get_ul_fields):
+    @patch('app.fetch_ipfs_content')
+    def test_handle_request_success(self, mock_fetch_ipfs_content, mock_get_token_uri, mock_get_chain_info, mock_get_ul_fields):
         # Mock the functions to return expected values
         mock_get_ul_fields.return_value = ('3', '3336', '51', '0xABC123', '789')
         mock_get_chain_info.return_value = (['http://example.com'], 1)
         mock_get_token_uri.return_value = 'ipfs://tokenUri'
-        mock_fetch_ipfs_data.return_value = {'data': 'some data'}
+        mock_fetch_ipfs_content.return_value = {'data': 'some data'}
 
         response = self.client.get('/GlobalConsensus(123)/Parachain(456)/AccountKey20(0xABC123)/GeneralKey(789)')
         self.assertEqual(response.status_code, 200)
@@ -96,7 +96,7 @@ class TestApp(unittest.TestCase):
         mock_response.json.return_value = {"data": "some data"}
         mock_requests_get.return_value = mock_response
 
-        result = fetch_ipfs_data('ipfs://someCID')
+        result = fetch_ipfs_content('ipfs://someCID')
         self.assertEqual(result, {"data": "some data"})
         mock_requests_get.assert_called_with('https://ipfs.io/ipfs/someCID')
 
@@ -107,52 +107,21 @@ class TestApp(unittest.TestCase):
         mock_load_gateways.return_value = loaded_config
         mock_requests_get.side_effect = requests.exceptions.HTTPError("Error")
 
-        result = fetch_ipfs_data('ipfs://someCID')
+        result = fetch_ipfs_content('ipfs://someCID')
         self.assertIsNone(result)
 
-    @patch('app.get_ul_fields')
+    @patch('app.fetch_url_content')
     @patch('app.get_chain_info')
     @patch('app.get_token_uri')
-    def test_handle_request_unsupported_https_token_uri(self, mock_get_token_uri, mock_get_chain_info, mock_get_ul_fields):
-        # Mock the functions to return expected values
-        mock_get_ul_fields.return_value = ('3', '3336', '51', '0xABC123', '789')
+    def test_handle_request_https_token_uri(self, mock_get_token_uri, mock_get_chain_info, mock_fetch_url_content):
+        mock_get_token_uri.return_value = 'https://www.mynet.com'
         mock_get_chain_info.return_value = (['http://example.com'], 1)
-        mock_get_token_uri.return_value = 'https://tokenUri'
+        mock_fetch_url_content.return_value = 'returned content from a server'
 
-        # Perform the GET request to the endpoint
-        response = self.client.get('/GlobalConsensus(123)/Parachain(456)/AccountKey20(0xABC123)/GeneralKey(789)')
+        response = self.client.get('/GlobalConsensus(123)/Parachain(456)/PalletInstance(52)/AccountKey20(0xABC123)/GeneralKey(789)')
 
-        # Check that the response status code is 400
-        self.assertEqual(response.status_code, 400)
-
-        # Assert the response contains the expected error message
-        self.assertIn(b"Invalid token URI standard.", response.data)
-
-        # Assert the content type is application/json
-        self.assertEqual(response.content_type, "application/json")
-
-    @patch('app.get_ul_fields')
-    @patch('app.get_chain_info')
-    @patch('app.get_token_uri')
-    def test_handle_request_unsupported_https_token_uri(self, mock_get_token_uri, mock_get_chain_info, mock_get_ul_fields):
-        # Mock the functions to return expected values
-        mock_get_ul_fields.return_value = ('3', '3336', '51', '0xABC123', '789')
-        mock_get_chain_info.return_value = (['http://example.com'], 1)
-        mock_get_token_uri.return_value = 'http://tokenUri'
-
-        # Perform the GET request to the endpoint
-        response = self.client.get('/GlobalConsensus(123)/Parachain(456)/AccountKey20(0xABC123)/GeneralKey(789)')
-
-        # Check that the response status code is 400
-        self.assertEqual(response.status_code, 400)
-
-        # Assert the response contains the expected error message
-        self.assertIn(b"Invalid token URI standard.", response.data)
-
-        # Assert the content type is application/json
-        self.assertEqual(response.content_type, "application/json")
-
-
+        self.assertIn(b"returned content from a server", response.data)
+        self.assertEqual(response.get_json(), 'returned content from a server')
 
 if __name__ == '__main__':
     unittest.main()

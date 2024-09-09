@@ -8,6 +8,7 @@ import time
 import logging
 import os
 from werkzeug.exceptions import HTTPException
+from urllib.parse import urlparse
 
 app = Flask(__name__)
 CORS(app)
@@ -137,17 +138,27 @@ def get_token_uri(rpc_urls, contract_address, asset_id):
     logging.error("Failed to fetch token URI after trying all RPC URLs.")
     return None
 
-def determine_token_uri_standard(token_uri):
-    if token_uri.startswith('ipfs://'):
-        return "ipfs"
-    elif token_uri.startswith('https://'):
-        return "https"
-    elif token_uri.startswith('http://'):
-        return "http"
-    else:
-        return "unknown"
+def is_valid_url(url):
+    try:
+        result = urlparse(url)
+        logging.info(f"Processing URL: {result.geturl()}")
+        return True
+    except ValueError:
+        return False
 
-def fetch_ipfs_data(token_uri):
+def fetch_url_content(url):
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()  # Raises an exception for HTTP errors
+        return response.text
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching the URL content: {e}")
+        return None
+
+def is_valid_ipfs(token_uri):
+    return token_uri.startswith('ipfs://')
+
+def fetch_ipfs_content(token_uri):
     # token_uri if forced to start with ipfs:// outside this method
     # Extract the CID and construct the URL with the IPFS gateway
     cid = token_uri.split('ipfs://')[1]
@@ -202,19 +213,28 @@ def handle_request(path):
         if not rpc_urls:
             abort(404, description="RPC URLs not found.")
 
-        tokenUri = get_token_uri(rpc_urls, account_key, general_key)
-        if not tokenUri:
-            abort(404, description="Token URI not found.")
+        token_uri = get_token_uri(rpc_urls, account_key, general_key)
+        if not token_uri:
+            abort(404, description="Token URI not found")
 
-        token_uri_standard = determine_token_uri_standard(tokenUri)
-        if token_uri_standard in ["ipfs"]:
-            token_uri_result = fetch_ipfs_data(tokenUri)
+        if is_valid_ipfs(token_uri):
+            token_uri_result = fetch_ipfs_content(token_uri)
             if not token_uri_result:
-                abort(502, description="Failed to fetch data from IPFS.")
-        else:
-            abort(400, description="Invalid token URI standard.")
+                abort(502, description=f"Failed to fetch data from IPFS {token_uri}")
+            return jsonify(token_uri_result)
 
-        return jsonify(token_uri_result)
+        if is_valid_url(token_uri):
+            token_uri_result = fetch_url_content(token_uri)
+            if not token_uri_result:
+                abort(502, description=f"Failed to fetch data from URL {token_uri}")      
+            logging.error(token_uri)
+            logging.error(token_uri_result)
+            return jsonify(token_uri_result)
+
+        # If the URI is not IPFS nor a valid URL, just return the content of token_uri
+        return jsonify({"token_uri": token_uri})
+
+        
 
     except Exception as e:
         # Let Flask handle the HTTP exceptions as intended (e.g., 400, 404, etc.)

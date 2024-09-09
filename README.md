@@ -89,7 +89,9 @@ When the server initiates, it logs the local server's URL (e.g., http://127.0.0.
 ## Testing
 The functionality can be tested by using curl or any API client like Postman.
 
-The following command line test should return the json metadata of an NFT on **LAOS Sigma**:
+Start the server locally. Then run the following command line tests, which should return the json metadata of existing NFTs:
 ```bash
-$ curl "http://127.0.0.1:5000/GlobalConsensus(0:0x77afd6190f1554ad45fd0d31aee62aacc33c6db0ea801129acb813f913e0764f)/Parachain(4006)/PalletInstance(51)/AccountKey20(0xfffffffffffffffffffffffe0000000000000004)/GeneralKey(34560331594530882314307165352126634424401996839473067194454284012200635144743)"
-```  
+$ curl "http://10.10.152.90:8080/GlobalConsensus(2)/Parachain(3370)/PalletInstance(51)/AccountKey20(0xFffFFFFFFfFfFFFFfFFfFFFe0000000000000000)/GeneralKey(4046614996555278700417118163670322946781784547715)"
+
+$ curl "http://10.10.152.90:8080/GlobalConsensus(0:0x77afd6190f1554ad45fd0d31aee62aacc33c6db0ea801129acb813f913e0764f)/Parachain(4006)/PalletInstance(51)/AccountKey20(0xfffffffffffffffffffffffe000000000000007b)/GeneralKey(1816828245772543144481346997133324732024448676966294077)"
+```
