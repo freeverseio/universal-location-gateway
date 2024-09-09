@@ -142,7 +142,7 @@ def is_valid_url(url):
     try:
         result = urlparse(url)
         logging.info(f"Processing URL: {result.geturl()}")
-        return True
+        return all([result.scheme, result.netloc])
     except ValueError:
         return False
 

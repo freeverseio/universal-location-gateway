@@ -122,6 +122,20 @@ class TestApp(unittest.TestCase):
 
         self.assertIn(b"returned content from a server", response.data)
         self.assertEqual(response.get_json(), 'returned content from a server')
+        self.assertEqual(response.status_code, 200)
+
+    @patch('app.get_ul_fields')
+    @patch('app.get_chain_info')
+    @patch('app.get_token_uri')
+    def test_token_uri_neither_ipfs_nor_url(self, mock_get_token_uri, mock_get_chain_info, mock_get_ul_fields):
+        mock_get_ul_fields.return_value = ('123', '456', '52', '0xABC123', '789')
+        mock_get_chain_info.return_value = (['http://example.com'], 1)
+        mock_get_token_uri.return_value = 'some_non_ipfs_or_url_token_uri'
+
+        response = self.client.get('/GlobalConsensus(123)/Parachain(456)/PalletInstance(52)/AccountKey20(0xABC123)/GeneralKey(789)')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json, {"token_uri": 'some_non_ipfs_or_url_token_uri'})
 
 if __name__ == '__main__':
     unittest.main()
