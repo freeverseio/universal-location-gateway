@@ -4,10 +4,17 @@ This Flask application serves as a gateway to fetch and return blockchain asset 
 
 ## Features
 
-- Parses URLs to extract blockchain-related parameters, following the [Universal Location Specification] (https://github.com/freeverseio/laos/issues/177)
-- Retrieves blockchain asset data from EVM-compatible chains connecting to the corresponding RPC nodes.
-- Fetches and returns IPFS-hosted metadata.
-- It supports private IPFS providers. Create the file `./supportedIPFSGatewaysPrivate.json` with content such as:
+- It parses the provided URL to extract blockchain-related parameters, following the [Universal Location Specification] (https://github.com/freeverseio/laos/issues/177). In particular, it tries to parse:
+  - the blockchain
+  - the contract address inside that blockchain
+  - the `tokenId` created within that contract
+
+- It then queries `tokenURI(tokenId)` in the parsed contract, and:
+  - if `tokenURI` points to `ipfs://` it returns the content of that IPFS address
+  - else, if `tokenURI` points to a valid URL, it returns the response of the server at that URL,
+  - else, it returns the raw string returned by `tokenURI(tokenId)`.  
+
+- It supports private IPFS providers. To set up your own provider, create the file `./supportedIPFSGatewaysPrivate.json` with content such as:
 
 ```
 [
@@ -21,8 +28,6 @@ This Flask application serves as a gateway to fetch and return blockchain asset 
 ## Limitations
 
 Currently:
-- it only supports `tokenURI` that returns an ipfs address.
-- it only supports ipfs addresses that return strings that can be parsed as a json object, explicitly, via the `jsonify` method.
 - it only supports locations in Polkadot, i.e. it reverts if the `Parachain` and `PalletInstance` junctions are not provided.
 
 ## Requirements
@@ -89,7 +94,16 @@ When the server initiates, it logs the local server's URL (e.g., http://127.0.0.
 ## Testing
 The functionality can be tested by using curl or any API client like Postman.
 
-The following command line test should return the json metadata of an NFT on **LAOS Sigma**:
+Start the server locally. Then run the following command line tests, which should return the json metadata of existing NFTs:
 ```bash
-$ curl "http://127.0.0.1:5000/GlobalConsensus(0:0x77afd6190f1554ad45fd0d31aee62aacc33c6db0ea801129acb813f913e0764f)/Parachain(4006)/PalletInstance(51)/AccountKey20(0xfffffffffffffffffffffffe0000000000000004)/GeneralKey(34560331594530882314307165352126634424401996839473067194454284012200635144743)"
-```  
+$ curl "http://10.10.152.90:8080/GlobalConsensus(2)/Parachain(3370)/PalletInstance(51)/AccountKey20(0xFffFFFFFFfFfFFFFfFFfFFFe0000000000000000)/GeneralKey(4046614996555278700417118163670322946781784547715)"
+
+$ curl "http://10.10.152.90:8080/GlobalConsensus(0:0x77afd6190f1554ad45fd0d31aee62aacc33c6db0ea801129acb813f913e0764f)/Parachain(4006)/PalletInstance(51)/AccountKey20(0xfffffffffffffffffffffffe000000000000007b)/GeneralKey(1816828245772543144481346997133324732024448676966294077)"
+
+$ curl "http://10.10.152.90:8080/GlobalConsensus(0:0x77afd6190f1554ad45fd0d31aee62aacc33c6db0ea801129acb813f913e0764f)/Parachain(4006)/PalletInstance(51)/AccountKey20(0xfffffffffffffffffffffffe000000000000007b)/GeneralKey(1820218929571150839251579545945226508630050440465998397)"
+```
+Likewise, this is a query about a token that does not exist:
+```bash
+$ curl "http://10.10.152.90:8080/GlobalConsensus(0:0x77afd6190f1554ad45fd0d31aee62aacc33c6db0ea801129acb813f913e0764f)/Parachain(4006)/PalletInstance(51)/AccountKey20(0xfffffffffffffffffffffffe000000000000007b)/GeneralKey(14320218929571150839251579545945226508630050440465998397)"
+```
+
