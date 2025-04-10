@@ -227,9 +227,9 @@ def handle_request(path):
             token_uri_result = fetch_url_content(token_uri)
             if not token_uri_result:
                 abort(502, description=f"Failed to fetch data from URL {token_uri}")      
-            logging.error(token_uri)
-            logging.error(token_uri_result)
-            return jsonify(token_uri_result)
+            logging.info(token_uri)
+            logging.info(token_uri_result)
+            return token_uri_result
 
         # If the URI is not IPFS nor a valid URL, just return the content of token_uri
         return jsonify({"token_uri": token_uri})

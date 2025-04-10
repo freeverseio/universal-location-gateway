@@ -121,7 +121,7 @@ class TestApp(unittest.TestCase):
         response = self.client.get('/GlobalConsensus(123)/Parachain(456)/PalletInstance(52)/AccountKey20(0xABC123)/GeneralKey(789)')
 
         self.assertIn(b"returned content from a server", response.data)
-        self.assertEqual(response.get_json(), 'returned content from a server')
+        self.assertEqual(response.data.decode(), 'returned content from a server')
         self.assertEqual(response.status_code, 200)
 
     @patch('app.get_ul_fields')

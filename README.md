@@ -98,6 +98,7 @@ Start the server locally. Then run the following command line tests, which shoul
 ```bash
 $ curl "http://10.10.152.90:8080/GlobalConsensus(2)/Parachain(3370)/PalletInstance(51)/AccountKey20(0xFffFFFFFFfFfFFFFfFFfFFFe0000000000000000)/GeneralKey(4046614996555278700417118163670322946781784547715)"
 
+# the following is stored in a private server:
 $ curl "http://10.10.152.90:8080/GlobalConsensus(0:0x77afd6190f1554ad45fd0d31aee62aacc33c6db0ea801129acb813f913e0764f)/Parachain(4006)/PalletInstance(51)/AccountKey20(0xfffffffffffffffffffffffe000000000000007b)/GeneralKey(1816828245772543144481346997133324732024448676966294077)"
 
 $ curl "http://10.10.152.90:8080/GlobalConsensus(0:0x77afd6190f1554ad45fd0d31aee62aacc33c6db0ea801129acb813f913e0764f)/Parachain(4006)/PalletInstance(51)/AccountKey20(0xfffffffffffffffffffffffe000000000000007b)/GeneralKey(1820218929571150839251579545945226508630050440465998397)"
